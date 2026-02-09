@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="es">
+<head>
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Postres — App (Final)</title>
+<style>
+:root{--bg:#f6f2ea;--card:#fff;--black:#0b0b0b;--gold:#c59d1f;--muted:#7a6f5d;--wa:#25D366;--tg:#0088cc}
+*{box-sizing:border-box}
+body{font-family:-apple-system,system-ui,"Segoe UI",Roboto,Arial;margin:0;background:var(--bg);color:var(--black);padding:16px}
+.app{max-width:980px;margin:0 auto}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.title{font-weight:800;display:flex;align-items:center;gap:10px}
+.logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,var(--gold),#e7c85a);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:22px}
+.small{font-size:20px;font-weight:700}
+.top-menu{display:flex;gap:12px;margin:12px 0}
+.top-tab{flex:1;text-align:center;padding:12px;background:var(--card);border-radius:12px;font-weight:800;font-size:18px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.top-tab.active{background:var(--black);color:white}
+.controls{display:flex;gap:8px;margin-bottom:12px}
+.input{flex:1;padding:12px;border-radius:12px;border:1px solid #e6dccb;background:transparent;font-size:18px}
+.btn{padding:10px 12px;border-radius:12px;border:none;background:var(--black);color:#fff;cursor:pointer;font-weight:800;font-size:16px}
+.ticket-box{background:var(--card);padding:14px;border-radius:12px;min-height:88px;font-size:16px;box-shadow:0 8px 20px rgba(0,0,0,0.04);margin-bottom:12px}
+.menu-block{overflow:hidden;background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,0.06)}
+.category-title { color:#000000 !important; font-weight:800 !important; font-size:20px !important; }
+.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(min-width:900px){ .menu-grid{grid-template-columns:repeat(3,1fr);} }
+.item-btn{display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;border-radius:16px;border:none;background:linear-gradient(180deg,var(--black),#0b0b0b);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,0.12);transition:transform .12s,box-shadow .12s;font-size:16px;line-height:1.1;width:100%;height: 82px;overflow:hidden}
+.select{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-bottom:8px;font-size:16px}
+.confirm{background:var(--gold);color:#000;border:none;padding:12px;border-radius:10px;width:100%;font-weight:800;font-size:16px;cursor:pointer}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9999}
+.modal{background:#fff;padding:16px;border-radius:12px;max-width:460px;width:94%;box-shadow:0 20px 40px rgba(0,0,0,0.3)}
+label{font-size:16px;display:block;margin:8px 0}
+.small-note{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+
+/* ===== Bottom Sheet ===== */
+.sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.4);
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  z-index: 999;
+}
+.sheet.hidden { display: none; }
+
+.sheet-content {
+  background: var(--sb-green,#1E3932);
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  padding: 16px;
+  animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.mesas-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
+}
+
+.mesa-btn {
+  padding: 16px;
+  border-radius: 14px;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 800;
+  border: 2px solid #000000;
+  font-size: 24px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.mesa-btn:active {
+  background: #eaeaea !important;
+  transform: scale(0.96);
+}
+
+
+</style>
+  <style>
+@media print {
+  body * { visibility: hidden !important; }
+  #ticketPrintArea, #ticketPrintArea * { visibility: visible !important; }
+  #ticketPrintArea {
+    position: absolute;
+    left: 0; top: 0;
+    width: 78mm;
+    padding: 10px;
+    font-size: 24px;
+    font-family: monospace;
+  }
+}
+</style>
+
+
+<!-- Modal helados custom style (inserted by assistant) -->
+<style id="assistant-modal-style">
+.modal-overlay-assist{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9999}
+.modal-assist{background:#fff;padding:22px;border-radius:18px;max-width:360px;width:92%;box-shadow:0 20px 40px rgba(0,0,0,0.25);text-align:left}
+.modal-assist .modal-title{font-size:20px;font-weight:800;margin:0 0 12px 0;color:#000;text-align:left}
+.bolas-selector{display:flex;gap:10px;margin-bottom:14px}
+.bolas-selector .bola-btn{flex:1;padding:11px;border-radius:10px;border:none;background:#eee;font-weight:800;font-size:16px;cursor:pointer}
+.bolas-selector .bola-btn.active{background:#c59d1f;color:#000}
+.modal-assist select{width:100%;padding:11px;border-radius:10px;border:1px solid #e3e3e3;margin-bottom:12px;font-size:15px}
+.modal-assist .modal-confirm{background:#c59d1f;color:#000;padding:13px;font-size:17px;font-weight:800;border-radius:10px;border:none;width:100%;cursor:pointer}
+</style>
+<!-- End modal style -->
+
+
+<style>
+.top-menu {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+}
+.top-tab {
+    height: 65px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: white !important;
+    border-radius: 14px !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    text-align: center !important;
+    padding: 6px !important;
+    line-height: 1.1 !important;
+}
+</style>
+
+
+<style>
+.top-tab { background:white !important; color:#000 !important; border:2px solid transparent !important; }
+.top-tab.active { background:#2E7D32 !important; color:white !important; border:2px solid #2E7D32 !important; }
+</style>
+
+
+<style>
+.top-menu {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    padding: 10px 0 !important;
+    background: var(--bg) !important;
+}
+</style>
+
+
+<style>
+.top-menu {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    padding: 10px 0 !important;
+    background: var(--bg) !important;
+    transition: opacity 0.25s ease;
+    opacity: 0.85;
+}
+.top-menu.is-sticky {
+    opacity: 1;
+}
+</style>
+
+
+<style>
+.top-tab{
+    flex:0 0 auto !important;
+    padding:8px 18px !important;
+    border-radius:30px !important;
+    background:#e8e8e8 !important;
+    color:#333 !important;
+    border:1px solid #d0d0d0 !important;
+    font-weight:500 !important;
+    font-size:15px !important;
+    white-space:nowrap !important;
+    transition:all 0.25s ease !important;
+}
+.top-tab.active{
+    background:#1a3d2f !important;
+    color:#fff !important;
+    border-color:#1a3d2f !important;
+}
+.top-menu{
+    overflow-x:auto !important;
+    padding:10px 4px !important;
+}
+.top-menu::-webkit-scrollbar{display:none;}
+</style>
+
+
+<style>
+/* Premium Starbucks green palette */
+:root{
+    --sb-green:#1E3932;
+    --sb-green-light:#2d544c;
+    --sb-cream:#f6f5ef;
+}
+
+/* top-menu pill style refinements */
+.top-menu{
+    overflow-x:auto !important;
+    padding:14px 6px !important;
+    background:var(--sb-cream) !important;
+    backdrop-filter: blur(6px) !important;
+}
+.top-menu::-webkit-scrollbar{display:none;}
+
+.top-tab{
+    flex:0 0 auto !important;
+    padding:10px 22px !important;
+    border-radius:40px !important;
+    background:#e9e8e3 !important;
+    color:#2c2c2c !important;
+    border:1px solid #d4d3cd !important;
+    font-weight:600 !important;
+    font-size:16px !important;
+    white-space:nowrap !important;
+    transition:all .25s ease !important;
+    box-shadow:0 1px 2px rgba(0,0,0,.08) !important;
+}
+.top-tab.active{
+    background:var(--sb-green) !important;
+    color:#fff !important;
+    border-color:var(--sb-green) !important;
+    box-shadow:0 3px 8px rgba(0,0,0,.25) !important;
+    transform:translateY(-1px) !important;
+}
+</style>
+
+<style></style>
+<style>
+:root{
+    --sb-green:#1E3932;
+    --sb-cream:#F6F5EF;
+    --sb-text-light:#FFFFFF;
+}
+
+body{
+    background:var(--sb-green) !important;
+    color:var(--sb-text-light) !important;
+}
+
+.app{
+    background:var(--sb-green) !important;
+}
+
+.header{
+    background:var(--sb-green) !important;
+    padding:20px 0 !important;
+}
+
+.top-menu{
+    background:var(--sb-green) !important;
+    padding:12px 6px !important;
+}
+
+.top-tab{
+    background:var(--sb-cream) !important;
+    color:#1E1E1E !important;
+    border-radius:30px !important;
+    font-weight:700 !important;
+    padding:10px 20px !important;
+    border:1px solid #d6d6d0 !important;
+}
+
+.top-tab.active{
+    background:#0F2A25 !important;
+    color:white !important;
+    border-color:#0F2A25 !important;
+}
+
+.input{
+    background:var(--sb-cream) !important;
+    border:1px solid #d6d6d0 !important;
+    color:#222 !important;
+}
+
+.ticket-box{
+    background:var(--sb-cream) !important;
+    color:#222 !important;
+}
+
+.menu-block{
+    background:var(--sb-cream) !important;
+    color:#000 !important;
+}
+
+.item-btn{
+    background:#1E1E1E !important;
+    color:white !important;
+}
+
+.btn{
+    background:#1E1E1E !important;
+    color:white !important;
+    border:none !important;
+}
+</style>
+
+
+<style>
+.category-title { color:#000000 !important; font-weight:800 !important; font-size:20px !important; }
+
+h1, h2, h3 {
+    display: block !important;
+    color: #1E3932 !important;
+}
+
+.modal, 
+.modal * {
+    color: #1E3932 !important;
+}
+
+.modal {
+    background: #ffffff !important;
+}
+
+.modal input,
+.modal textarea {
+    background: #F5F5F5 !important;
+    border: 1px solid #ccc !important;
+    color: #1E3932 !important;
+}
+
+.modal input::placeholder,
+.modal textarea::placeholder {
+    color: #7A7A7A !important;
+}
+
+.modal label {
+    color: #1E3932 !important;
+}
+
+.modal input[type="checkbox"] {
+    accent-color: #1E3932 !important;
+}
+</style>
+
+
+<style>
+
+/* ------------------------------
+   FIX GLOBAL STARBUCKS
+   ------------------------------ */
+
+/* Grupos */
+.category-title { color:#000000 !important; font-weight:800 !important; font-size:20px !important; }
+
+/* Títulos del modal */
+.modal h1, 
+.modal h2, 
+.modal h3 {
+    color: #1E3932 !important;
+    font-weight: 800 !important;
+}
+
+/* Texto modal */
+.modal, 
+.modal * {
+    color: #1E3932 !important;
+}
+
+/* Fondo del modal */
+.modal {
+    background: #FFFFFF !important;
+}
+
+/* Inputs modal */
+.modal input,
+.modal textarea {
+    background: #F5F5F5 !important;
+    border: 1px solid #d0d0d0 !important;
+    color: #1E3932 !important;
+}
+
+/* Placeholder */
+.modal input::placeholder,
+.modal textarea::placeholder {
+    color: #7A7A7A !important;
+}
+
+/* Labels modal */
+.modal label {
+    color: #1E3932 !important;
+    font-weight: 600 !important;
+}
+
+/* Checkbox */
+.modal input[type="checkbox"] {
+    accent-color: #1E3932 !important;
+}
+
+/* Botón Añadir */
+.modal .confirm,
+.confirm {
+    background: #C59D1F !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+    border-radius: 14px !important;
+}
+
+</style>
+
+
+<style>
+.input {
+    font-size: 20px !important;
+}
+</style>
+
+
+<style>
+.menu-block {
+    background: rgba(255, 255, 255, 0.20) !important;
+}
+</style>
+
+
+<style>
+.category-title{
+    font-family:"Tusca","Tusca Regular","Tusca-Regular",serif !important;
+    color:#FFFFFF !important;
+    font-size:28px !important;
+    font-weight:normal !important;
+    margin-bottom:18px !important;
+    letter-spacing:1px !important;
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+
+<div class="header" style="display:flex;justify-content:center;align-items:center;padding:12px 0;">
+<img src="logo.png" style="height:45px;object-fit:contain;">
+</div>
+
+
+  <div class="top-menu" role="tablist" aria-label="Menú principal">
+    <div id="tabPostres" class="top-tab active" role="tab">POSTRES</div>
+    <div id="tabCafes" class="top-tab" role="tab">CAFÉS</div>
+    <div id="tabTe" class="top-tab" role="tab">TÉ</div>
+    <div id="tabPmenu" class="top-tab" role="tab">P. MENÚ</div>
+  </div>
+
+  
+<div class="controls">
+  <button id="openMesa" class="btn">Mesa ▾</button>
+  <input id="mesaInput" class="input mesa-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Mesa" readonly>
+  <button id="resetBtn" class="btn">Reset</button>
+</div>
+
+<div id="mesaSheet" class="sheet hidden">
+  <div class="sheet-content">
+    <h3>Selecciona mesa</h3>
+    <div id="mesasGrid" class="mesas-grid"></div>
+  </div>
+</div>
+
+
+  <input id="notaExtra" class="input" type="text" placeholder="Notas adicionales... (opcional)" style="margin-bottom:12px">
+
+  <div id="ticketBox" class="ticket-box">
+    <div style="font-weight:800;margin-bottom:6px">Ticket</div>
+    <div id="ticketContent">No hay artículos seleccionados</div>
+  </div>
+
+  <div id="menuContainer"></div>
+  <div id="menuCafes" style="display:none"></div>
+  <div id="menuTe" style="display:none"></div>
+  <div id="menuPmenu" style="display:none"></div>
+
+  <div style="margin-top:18px" class="top-actions">
+    <button id="btnPrint" class="btn">Imprimir comanda</button>
+    <button id="btnWhats" class="btn" style="background:var(--wa)">Enviar WhatsApp</button>
+    <button id="btnTg" class="btn" style="background:var(--tg)">Enviar Telegram</button>
+  </div>
+
+  <div class="small-note">App PWA optimizada para iPhone — Añadir a pantalla de inicio (Safari → Compartir → Añadir a pantalla de inicio)</div>
+</div>
+
+<div id="overlay" class="modal-overlay" aria-hidden="true"><div id="panel" class="modal" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/* ---------- Datos ---------- */
+const sabores = ["CHOCOLATE","VAINILLA","FRESA","SORBETE LIMÓN"];
+const categorias = {
+  "HELADOS":[ "HELADO", "HELADO CON NUECES", "HELADO CON NATA Y NUECES", "COPA TRICOLOR", "CROCANTI", "CONTESA", "TARTA AL WHISKY", "TRUFAS" ],
+  "FLAMBEADO / CON MIEL":[ "HELADO CON MIEL", "HELADO FLAMBEADO", "PLÁTANO CON MIEL", "PLÁTANO FLAMBEADO" ],
+  "OTROS":[ "SORBETE LIMÓN", "SORBETE LIMÓN CAVA", "NUECES CARAMELIZADAS", "NATA CON NUECES", "FLAN CON NATA", "MOCHIS FRUTA PASIÓN", "MOCHIS CHEESECAKE", "JENGIBRE" ],
+  "FRUTA":[ "LYCHIS", "NARANJA", "MANZANA", "PLÁTANO" ]
+};
+const cafes = ["CAFE SOLO","CAFE LARGO","CORTADO","CAFE CON LECHE","CARAJILLO","CAFE IRLANDES","AMERICANO"];
+const tes = ["MANZANILLA","POLEO MENTA","FRUTOS ROJOS","TILA","TÉ VERDE","TÉ ROJO","TÉ NEGRO","TÉ JAZMIN"];
+const pMenuItems = ["HELADO (Menú)","CONTESA (Menú)","TARTA AL WHISKY (Menú)","PLÁTANO CON MIEL (Menú)","LYCHIS (Menú)","FLAN CON NATA (Menú)","FRUTA DEL DÍA (Menú)"];
+
+/* ---------- Refs ---------- */
+const menuContainer = document.getElementById('menuContainer');
+const menuCafes = document.getElementById('menuCafes');
+const menuTe = document.getElementById('menuTe');
+const menuPmenu = document.getElementById('menuPmenu');
+const mesaInput = document.getElementById('mesaInput');
+const ticketContent = document.getElementById('ticketContent');
+const notaExtra = document.getElementById('notaExtra');
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('panel');
+const tabPostres = document.getElementById('tabPostres');
+const tabCafes = document.getElementById('tabCafes');
+const tabTe = document.getElementById('tabTe');
+const tabPmenu = document.getElementById('tabPmenu');
+const btnPrint = document.getElementById('btnPrint');
+const btnWhats = document.getElementById('btnWhats');
+const btnTg = document.getElementById('btnTg');
+
+let pedido = {};
+
+/* ---------- Helpers ---------- */
+function vibrar(){ if(navigator.vibrate) navigator.vibrate(18); }
+document.addEventListener('click', e=>{ if(e.target.closest && e.target.closest('.item-btn, .btn, .confirm')) vibrar(); });
+function crearTitulo(txt){ const t = document.createElement('div'); t.className='category-title'; t.textContent=txt; return t; }
+function crearBtn(text,fn){ const b=document.createElement('button'); b.className='item-btn'; b.textContent=text; b.addEventListener('click',fn); return b; }
+function abrirModal(){ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); }
+function cerrarModal(){ overlay.style.display='none'; panel.innerHTML=''; overlay.setAttribute('aria-hidden','true'); }
+overlay.addEventListener('click', e=>{ if(e.target===overlay) cerrarModal(); });
+
+/* ---------- Build menus ---------- */
+function buildPostres(){
+  menuContainer.innerHTML='';
+  for(const g in categorias){
+    const block = document.createElement('div'); block.className='menu-block';
+    block.appendChild(crearTitulo(g));
+    const grid = document.createElement('div'); grid.className='menu-grid';
+    categorias[g].forEach(name => grid.appendChild(crearBtn(name, ()=> seleccionar(name))));
+    block.appendChild(grid); menuContainer.appendChild(block);
+  }
+}
+
+function buildCafes(){
+  menuCafes.innerHTML='';
+  const block=document.createElement('div'); block.className='menu-block';
+  block.appendChild(crearTitulo('CAFÉS'));
+  const grid=document.createElement('div'); grid.className='menu-grid';
+  cafes.forEach(c=> grid.appendChild(crearBtn(c, ()=> mostrarNotaCafe(c))));
+  block.appendChild(grid); menuCafes.appendChild(block);
+}
+
+function buildTe(){
+  menuTe.innerHTML='';
+  const block=document.createElement('div'); block.className='menu-block';
+  block.appendChild(crearTitulo('TÉ'));
+  const grid=document.createElement('div'); grid.className='menu-grid';
+  tes.forEach(t=> grid.appendChild(crearBtn(t, ()=> mostrarTe(t))));
+  block.appendChild(grid); menuTe.appendChild(block);
+}
+
+function buildPmenu(){
+  menuPmenu.innerHTML='';
+  const block=document.createElement('div'); block.className='menu-block';
+  block.appendChild(crearTitulo('P. MENÚ'));
+  const grid=document.createElement('div'); grid.className='menu-grid';
+  pMenuItems.forEach(i=> grid.appendChild(crearBtn(i, ()=> seleccionarPmenu(i))));
+  block.appendChild(grid); menuPmenu.appendChild(block);
+}
+
+/* ---------- Modals and actions ---------- */
+
+
+function mostrarSabores(item) {
+  // Open redesigned modal for helados (applies to any item that uses sabores)
+  const overlay = document.getElementById('modalOverlayAssist');
+  const selectsArea = document.getElementById('modalSelectsArea');
+  const addBtn = document.getElementById('modalAddBtn');
+  const bolaBtns = document.querySelectorAll('#bolasSelector .bola-btn');
+
+  // flavors array: attempt to reuse existing 'sabores' variable if present
+  var saboresList = typeof sabores !== 'undefined' ? sabores : [
+    'CHOCOLATE','VAINILLA','FRESA','SORBETE LIMÓN'
+  ];
+
+  function openModal() {
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden','false');
+  }
+  function closeModal() {
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+    selectsArea.innerHTML = '';
+  }
+
+  // Render selects based on selected bolas
+  function renderSelects(bolas) {
+    selectsArea.innerHTML = '';
+    if (bolas === 1) {
+      const s = document.createElement('select');
+      s.innerHTML = '<option value=\"\">ESCOJA EL SABOR</option>' + saboresList.map(sv => '<option value=\"'+sv+'\">'+sv+'</option>').join('');
+      selectsArea.appendChild(s);
+    } else {
+      const s1 = document.createElement('select');
+      const s2 = document.createElement('select');
+      const ops = '<option value=\"\">ESCOJA EL SABOR</option>' + saboresList.map(sv => '<option value=\"'+sv+'\">'+sv+'</option>').join('');
+      s1.innerHTML = ops;
+      s2.innerHTML = ops;
+      selectsArea.appendChild(s1);
+      selectsArea.appendChild(s2);
+    }
+  }
+
+  // Initialize default (2 bolas)
+  renderSelects(2);
+
+  // Bola buttons toggle
+  bolaBtns.forEach(btn => {
+    btn.onclick = function() {
+      bolaBtns.forEach(b=>b.classList.remove('active'));
+      this.classList.add('active');
+      const bcount = parseInt(this.getAttribute('data-bolas'),10);
+      renderSelects(bcount);
+    };
+  });
+
+  // Add button: gather selection and add to ticket using existing addItem() if present
+  addBtn.onclick = function() {
+    const selects = selectsArea.querySelectorAll('select');
+    const chosen = Array.from(selects).map(s=>s.value).filter(Boolean);
+    if (chosen.length === 0) {
+      alert('Selecciona el sabor');
+      return;
+    }
+    // Build label
+    var label = item;
+    if (selectedBolasCount() === 1) {
+      label += ' (1 bola: ' + chosen[0] + ')';
+    } else {
+      label += ' (2 bolas: ' + chosen[0] + (chosen[1] ? ' + ' + chosen[1] : ' + ' + chosen[0]) + ')';
+    }
+    // attempt to call existing addItem function (keeps original behavior)
+    if (typeof addItem === 'function') {
+      addItem(label);
+    } else if (typeof agregarArticulo === 'function') {
+      agregarArticulo(label);
+    } else {
+      // fallback: append to ticket area if exists
+      var ticket = document.querySelector('.ticket-area') || document.querySelector('#ticket') || document.body;
+      var div = document.createElement('div');
+      div.textContent = label;
+      ticket.appendChild(div);
+    }
+    closeModal();
+  };
+
+  function selectedBolasCount() {
+    const active = document.querySelector('#bolasSelector .bola-btn.active');
+    return active ? parseInt(active.getAttribute('data-bolas'),10) : 2;
+  }
+
+  // Clicking outside modal closes it
+  overlay.onclick = function(e) {
+    if (e.target === overlay) closeModal();
+  };
+
+  openModal();
+}
+
+
+function mostrarTrufas(item){
+  if(!mesaInput.value) return mesaInput.focus();
+  panel.innerHTML=''; panel.appendChild(crearTitulo('TRUFAS'));
+  const lbl = document.createElement('label'); lbl.innerHTML = '<input type="checkbox" id="trufasN"> CON NATA';
+  panel.appendChild(lbl);
+  const btn = document.createElement('button'); btn.className='confirm'; btn.textContent='Añadir';
+  btn.onclick = function(){ let final = item; if(document.getElementById('trufasN') && document.getElementById('trufasN').checked) final += ' (CON NATA)'; addItem(final); cerrarModal(); };
+  panel.appendChild(btn);
+  abrirModal();
+}
+
+function mostrarFlan(item){
+  if(!mesaInput.value) return mesaInput.focus();
+  panel.innerHTML=''; panel.appendChild(crearTitulo('FLAN'));
+  const lbl = document.createElement('label'); lbl.innerHTML = '<input type="checkbox" id="flanSin"> SIN NATA';
+  panel.appendChild(lbl);
+  const btn = document.createElement('button'); btn.className='confirm'; btn.textContent='Añadir';
+  btn.onclick = function(){ let final = item; if(document.getElementById('flanSin') && document.getElementById('flanSin').checked) final += ' (SIN NATA)'; addItem(final); cerrarModal(); };
+  panel.appendChild(btn);
+  abrirModal();
+}
+
+function mostrarNotaCafe(cafe){
+  if(!mesaInput.value) return mesaInput.focus();
+
+  panel.innerHTML='';
+  panel.appendChild(crearTitulo(cafe));
+
+  const t = document.createElement('input');
+  t.className='input';
+  t.placeholder='Nota (opcional)';
+  panel.appendChild(t);
+
+  const lbl1 = document.createElement('label');
+  lbl1.innerHTML = '<input type="checkbox" id="descaf"> DESCAFEINADO';
+  panel.appendChild(lbl1);
+
+  const lbl2 = document.createElement('label');
+  lbl2.innerHTML = '<input type="checkbox" id="conh"> CON HIELO';
+  panel.appendChild(lbl2);
+
+  const lbl3 = document.createElement('label');
+  lbl3.innerHTML = '<input type="checkbox" id="sinlactosa"> SIN LACTOSA';
+  panel.appendChild(lbl3);
+
+  const lbl4 = document.createElement('label');
+  lbl4.innerHTML = '<input type="checkbox" id="sacarina"> SACARINA';
+  panel.appendChild(lbl4);
+
+  const btn = document.createElement('button');
+  btn.className='confirm';
+  btn.textContent='Añadir';
+
+  btn.onclick = function(){
+    let final = cafe;
+
+    if(document.getElementById('descaf')?.checked) final += ' (DESCAFEINADO)';
+    if(document.getElementById('conh')?.checked) final += ' (CON HIELO)';
+    if(document.getElementById('sinlactosa')?.checked) final += ' (SIN LACTOSA)';
+    if(document.getElementById('sacarina')?.checked) final += ' (SACARINA)';
+
+    if(t.value && t.value.trim()) final += ' ('+t.value.trim()+')';
+
+    addItem(final);
+    cerrarModal();
+  };
+
+  panel.appendChild(btn);
+  abrirModal();
+}
+
+
+function mostrarTe(name){
+  if(!mesaInput.value) return mesaInput.focus();
+  panel.innerHTML=''; panel.appendChild(crearTitulo(name));
+  // Nota opcional
+  const nota = document.createElement('input'); nota.className='input'; nota.placeholder='Nota (opcional)'; panel.appendChild(nota);
+  // Con hielo
+  const lblh = document.createElement('label'); lblh.innerHTML = '<input type="checkbox" id="teH"> CON HIELO'; panel.appendChild(lblh);
+  if(name === 'TÉ JAZMIN'){
+    const lb1 = document.createElement('label'); lb1.innerHTML = '<input type="checkbox" id="teL"> RODAJA LIMÓN'; panel.appendChild(lb1);
+    const lb2 = document.createElement('label'); lb2.innerHTML = '<input type="checkbox" id="teJ"> JENGIBRE'; panel.appendChild(lb2);
+  }
+  const btn = document.createElement('button'); btn.className='confirm'; btn.textContent='Añadir';
+  btn.onclick = function(){ let parts = []; if(nota.value && nota.value.trim()) parts.push(nota.value.trim()); if(document.getElementById('teH') && document.getElementById('teH').checked) parts.push('CON HIELO'); if(name==='TÉ JAZMIN'){ if(document.getElementById('teL') && document.getElementById('teL').checked) parts.push('RODAJA LIMÓN'); if(document.getElementById('teJ') && document.getElementById('teJ').checked) parts.push('JENGIBRE'); } let final = name; if(parts.length) final += ' ['+parts.join(', ')+']'; addItem(final); cerrarModal(); };
+  panel.appendChild(btn);
+  abrirModal();
+}
+
+function mostrarTarta(item){
+  if(!mesaInput.value) return mesaInput.focus();
+  panel.innerHTML=''; panel.appendChild(crearTitulo('TARTA AL WHISKY'));
+  const lbl = document.createElement('label'); lbl.innerHTML = '<input type="checkbox" id="wh"> CON WHISKY'; panel.appendChild(lbl);
+  const btn = document.createElement('button'); btn.className='confirm'; btn.textContent='Añadir';
+  btn.onclick = function(){ let final = item; if(document.getElementById('wh') && document.getElementById('wh').checked) final += ' (CON WHISKY)'; addItem(final); cerrarModal(); };
+  panel.appendChild(btn);
+  abrirModal();
+}
+
+/* ---------- Selection logic ---------- */
+function seleccionar(name){
+  if(!mesaInput.value) return mesaInput.focus();
+  if(name === 'TARTA AL WHISKY') return mostrarTarta(name);
+  if(name === 'FLAN CON NATA') return mostrarFlan(name);
+  if(name === 'TRUFAS') return mostrarTrufas(name);
+  if(['HELADO','HELADO CON NUECES','HELADO CON NATA Y NUECES'].includes(name)) return mostrarSabores(name);
+  addItem(name);
+}
+
+function seleccionarPmenu(name){
+  if(!mesaInput.value) return mesaInput.focus();
+  if(name === 'HELADO (Menú)') return mostrarSabores(name);
+  if(name === 'TARTA AL WHISKY (Menú)') return mostrarTarta(name);
+  if(name === 'FLAN CON NATA (Menú)') return mostrarFlan(name);
+  if(name === 'FRUTA DEL DÍA (Menú)') return mostrarFrutaMenu();
+  addItem(name);
+}
+
+function mostrarFrutaMenu(){
+  if(!mesaInput.value) return mesaInput.focus();
+  panel.innerHTML=''; panel.appendChild(crearTitulo('FRUTA DEL DÍA'));
+  ['NARANJA','MANZANA','PLÁTANO'].forEach(o=>{
+    const lbl = document.createElement('label');
+    lbl.innerHTML = '<input type="checkbox" class="fr" value="'+o+'"> '+o;
+    panel.appendChild(lbl);
+  });
+  const btn = document.createElement('button'); btn.className='confirm'; btn.textContent='Añadir';
+  btn.onclick = function(){ const sel = [...panel.querySelectorAll('.fr')].filter(x=>x.checked).map(x=>x.value); if(!sel.length){ alert('Selecciona al menos una'); return; } addItem('FRUTA DEL DÍA ('+sel.join(', ')+')'); cerrarModal(); };
+  panel.appendChild(btn); abrirModal();
+}
+
+/* ---------- Order management ---------- */
+function addItem(name){ pedido[name] = (pedido[name]||0) + 1; renderTicket(); savePedido(); flashTicket(); }
+window.eliminarItem = function(n){ if(!pedido[n]) return; pedido[n]--; if(pedido[n]<=0) delete pedido[n]; renderTicket(); savePedido(); };
+
+function renderTicket(){
+  let html=''; if(mesaInput.value) html += '<div><strong>Mesa: '+mesaInput.value+'</strong></div><br>';
+  for(const k in pedido) html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span>'+pedido[k]+' × '+k+'</span><button onclick="eliminarItem(\''+k.replace(/'/g,"\'")+'\')">🗑️</button></div>';
+  if(notaExtra.value && notaExtra.value.trim()!=='') html += '<br><div><strong>Notas adicionales:</strong> '+notaExtra.value+'</div>';
+  ticketContent.innerHTML = html || 'No hay artículos seleccionados';
+}
+
+function buildComandaText(){
+  const mesa = mesaInput.value || '-'; const now = new Date();
+  let lines = ['*** COMANDA ***','Mesa: ' + mesa,'Fecha: ' + now.toLocaleString(),''];
+  for(const k in pedido) lines.push(pedido[k] + ' x ' + k);
+  if(notaExtra.value && notaExtra.value.trim()!==''){ lines.push(''); lines.push('Notas: ' + notaExtra.value); }
+  return lines.join('\n');
+}
+
+function downloadComandaText(content){ const blob = new Blob([content],{type:'text/plain'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='comanda.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+btnPrint.addEventListener("click", () => {
+  if (!mesaInput.value) { mesaInput.focus(); return; }
+  const area = document.getElementById("ticketPrintArea");
+  area.style.display = "block";
+  area.textContent = buildComandaText();
+  setTimeout(() => { window.print(); area.style.display = "none"; }, 200);
+});
+btnWhats.addEventListener('click', ()=>{ if(!mesaInput.value){ mesaInput.focus(); return; } const txt = encodeURIComponent(buildComandaText()); window.open('https://api.whatsapp.com/send?text=' + txt,'_blank'); });
+btnTg.addEventListener('click', ()=>{ if(!mesaInput.value){ mesaInput.focus(); return; } const txt = encodeURIComponent(buildComandaText()); window.open('https://t.me/share/url?url=&text=' + txt,'_blank'); });
+
+/* ---------- Persistence ---------- */
+function savePedido(){ try{ localStorage.setItem('postres_pedido', JSON.stringify(pedido)); localStorage.setItem('postres_mesa', mesaInput.value||''); localStorage.setItem('postres_extra', notaExtra.value||''); }catch(e){} }
+function loadPedido(){ try{ const p = JSON.parse(localStorage.getItem('postres_pedido')||'{}'); pedido = p||{}; mesaInput.value = localStorage.getItem('postres_mesa')||''; notaExtra.value = localStorage.getItem('postres_extra')||''; renderTicket(); }catch(e){} }
+
+function flashTicket(){ const el = document.getElementById('ticketBox'); if(!el) return; el.animate([{opacity:0.6},{opacity:1}],{duration:200}); }
+
+/* ---------- Tabs ---------- */
+tabPostres.addEventListener('click', ()=>{ tabPostres.classList.add('active'); tabCafes.classList.remove('active'); tabTe.classList.remove('active'); tabPmenu.classList.remove('active'); menuContainer.style.display='block'; menuCafes.style.display='none'; menuTe.style.display='none'; menuPmenu.style.display='none'; });
+tabCafes.addEventListener('click', ()=>{ tabCafes.classList.add('active'); tabPostres.classList.remove('active'); tabTe.classList.remove('active'); tabPmenu.classList.remove('active'); menuContainer.style.display='none'; menuCafes.style.display='block'; menuTe.style.display='none'; menuPmenu.style.display='none'; });
+tabTe.addEventListener('click', ()=>{ tabTe.classList.add('active'); tabPostres.classList.remove('active'); tabCafes.classList.remove('active'); tabPmenu.classList.remove('active'); menuContainer.style.display='none'; menuCafes.style.display='none'; menuTe.style.display='block'; menuPmenu.style.display='none'; });
+tabPmenu.addEventListener('click', ()=>{ tabPmenu.classList.add('active'); tabPostres.classList.remove('active'); tabCafes.classList.remove('active'); tabTe.classList.remove('active'); menuContainer.style.display='none'; menuCafes.style.display='none'; menuTe.style.display='none'; menuPmenu.style.display='block'; });
+
+// Init
+buildPostres(); buildCafes(); buildTe(); buildPmenu(); loadPedido(); menuContainer.style.display='block';
+
+// Service worker (if exists)
+if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('service-worker.js'); }catch(e){} }
+
+  function resetPedido() {
+  pedido = {};             // vacía el pedido
+  mesaInput.value = '';    // limpia mesa
+  notaExtra.value = '';    // limpia nota
+  renderTicket();          // actualiza ticket
+  savePedido();            // limpia localStorage
+  flashTicket();           // efecto visual
+}
+
+function confirmReset() {
+  panel.innerHTML = '';
+
+  // Título
+  const t = document.createElement('h3');
+  t.textContent = '¿Borrar la comanda?';
+  panel.appendChild(t);
+
+  // Texto
+  const p = document.createElement('div');
+  p.style.margin = '8px 0 12px';
+  p.textContent = '¿Seguro que quieres borrar la comanda?';
+  panel.appendChild(p);
+
+  // Botón Cancelar
+  const c = document.createElement('button');
+  c.textContent = 'Cancelar';
+  c.className = 'btn-cancel-reset'; // ❌ no pongas 'btn'
+  c.onclick = () => cerrarModal();
+
+  // Botón Borrar
+  const d = document.createElement('button');
+  d.textContent = 'Borrar';
+  d.className = 'confirm';
+  d.onclick = () => {
+    resetPedido();   // limpia pedido y localStorage
+    cerrarModal();   // cierra modal
+  };
+
+  // Contenedor de botones
+  const w = document.createElement('div');
+  w.style.display = 'flex';
+  w.style.gap = '8px';
+  w.appendChild(c);
+  w.appendChild(d);
+  panel.appendChild(w);
+
+  abrirModal();
+}
+
+  // Conectar el botón Reset con la función
+  document.addEventListener('DOMContentLoaded', () => {
+    const rb = document.getElementById('resetBtn');
+    if (rb) rb.onclick = confirmReset;
+  });
+
+/* Bottom sheet mesas */
+const openMesa = document.getElementById('openMesa');
+const sheet = document.getElementById('mesaSheet');
+const mesasGrid = document.getElementById('mesasGrid');
+const mesas = Array.from({length:27},(_,i)=>i+2);
+
+openMesa.onclick = ()=> sheet.classList.remove('hidden');
+sheet.onclick = e => { if(e.target===sheet) sheet.classList.add('hidden'); };
+
+mesas.forEach(n=>{
+  const b=document.createElement('button');
+  b.textContent=n;
+  b.className='mesa-btn';
+  b.onclick=()=>{
+    mesaInput.value=n;
+    sheet.classList.add('hidden');
+    savePedido();
+  };
+  mesasGrid.appendChild(b);
+});
+
+</script>
+<div id="ticketPrintArea" style="display:none; white-space:pre-wrap;"></div>
+
+<script>
+(function(){
+  function isiOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+  if (isiOS()) {
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) {
+        try { t.focus(); } catch(e){}
+      }
+    }, true);
+  }
+})();
+</script>
+
+
+<!-- Modal container inserted by assistant -->
+<div id="modalOverlayAssist" class="modal-overlay-assist" aria-hidden="true">
+  <div class="modal-assist" role="dialog" aria-modal="true" aria-labelledby="modalTitleAssist">
+    <div id="modalTitleAssist" class="modal-title">Selecciona cantidad y sabores</div>
+    <div class="bolas-selector" id="bolasSelector">
+      <button class="bola-btn active" data-bolas="2">2 bolas</button>
+      <button class="bola-btn" data-bolas="1">1 bola</button>
+    </div>
+    <div id="modalSelectsArea"></div>
+    <button id="modalAddBtn" class="modal-confirm">Añadir</button>
+  </div>
+</div>
+<!-- End modal container -->
+
+
+<script>
+document.addEventListener("scroll", () => {
+    const menu = document.querySelector(".top-menu");
+    if (!menu) return;
+    if (window.scrollY > 10) {
+        menu.classList.add("is-sticky");
+    } else {
+        menu.classList.remove("is-sticky");
+    }
+});
+</script>
+
+</body>
+</html>
+<style>
+.mesa-input {
+  width: 70px;
+  flex: 0 0 70px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  padding: 10px;
+}
+</style>
+
+<style>#resetBtn{background:#c40000!important;color:white!important;}
+</style>
+
+<style>
+.modal input[type="checkbox"] {
+  transform: scale(1.4);
+  margin-right: 8px;
+}
+</style>
+
+<style>
+/* Estilo botón Cancelar en ventana de borrar comanda */
+.btn-cancel-reset {
+  background: #c40000 !important;  /* rojo */
+  color: #fff !important;          /* texto blanco */
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  cursor: pointer;
+  flex: 1;                         /* mismo ancho que Borrar */
+}
+</style>
+
