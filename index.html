@@ -453,6 +453,9 @@ h1, h2, h3 {
     <div id="tabTe" class="top-tab" role="tab">TÉ</div>
     <div id="tabPmenu" class="top-tab" role="tab">P. MENÚ</div>
   </div>
+  
+  <!-- Aquí el buscador -->
+  <input id="searchInput" class="input" type="text" placeholder="Buscar artículo...">
 
   
 <div class="controls">
@@ -901,6 +904,19 @@ function confirmReset() {
 
   abrirModal();
 }
+
+  const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+
+  // Filtramos todos los botones de menú visibles
+  document.querySelectorAll('.menu-grid button').forEach(btn => {
+    const text = btn.textContent.toLowerCase();
+    btn.style.display = text.includes(query) ? 'flex' : 'none';
+  });
+});
+
 
   // Conectar el botón Reset con la función
   document.addEventListener('DOMContentLoaded', () => {
