@@ -853,6 +853,27 @@ tabPmenu.addEventListener('click', ()=>{ tabPmenu.classList.add('active'); tabPo
 // Init
 buildPostres(); buildCafes(); buildTe(); buildPmenu(); loadPedido(); menuContainer.style.display='block';
 
+  // ----------------- BÚSQUEDA GLOBAL -----------------
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', () => {
+  const term = searchInput.value.toLowerCase();
+
+  const tabs = [menuContainer, menuCafes, menuTe, menuPmenu];
+
+  tabs.forEach(tab => {
+    const items = tab.querySelectorAll('.item-btn');
+
+    items.forEach(item => {
+      if (item.textContent.toLowerCase().includes(term)) {
+        item.style.display = 'flex';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+});
+
 // Service worker (if exists)
 if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('service-worker.js'); }catch(e){} }
 
@@ -904,19 +925,6 @@ function confirmReset() {
 
   abrirModal();
 }
-
-  const searchInput = document.getElementById('searchInput');
-
-searchInput.addEventListener('input', () => {
-  const query = searchInput.value.toLowerCase();
-
-  // Filtramos todos los botones de menú visibles
-  document.querySelectorAll('.menu-grid button').forEach(btn => {
-    const text = btn.textContent.toLowerCase();
-    btn.style.display = text.includes(query) ? 'flex' : 'none';
-  });
-});
-
 
   // Conectar el botón Reset con la función
   document.addEventListener('DOMContentLoaded', () => {
