@@ -1069,6 +1069,11 @@ document.addEventListener("scroll", () => {
 </style>
 
 <style>
+
+  *{
+  box-sizing:border-box;
+}
+  
 body{
   margin:0;
   font-family:system-ui;
@@ -1086,12 +1091,15 @@ body{
   gap:8px;
   margin:10px 0 14px;
   align-items:center;
+  flex-wrap:wrap;          /* 👈 clave */
 }
+
 
 .control-bar .search{
   flex:1;
   font-size:18px;
   padding:12px;
+  flex:1 1 100%;           /* 👈 ocupa toda la fila */
 }
 
 .mesa-btn-mini{
@@ -1119,4 +1127,5 @@ body{
 }
 
 </style>
+
 
