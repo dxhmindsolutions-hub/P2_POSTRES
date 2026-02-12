@@ -455,14 +455,15 @@ h1, h2, h3 {
   </div>
   
   <!-- Aquí el buscador -->
-  <input id="searchInput" class="input" type="text" placeholder="Buscar artículo...">
+ <div class="control-bar">
+  <input id="searchInput" class="input search" type="text" placeholder="🔎 Buscar...">
 
-  
-<div class="controls">
-  <button id="openMesa" class="btn">Mesa ▾</button>
-  <input id="mesaInput" class="input mesa-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Mesa" readonly>
-  <button id="resetBtn" class="btn">Reset</button>
+  <button id="openMesa" class="btn mesa-btn-mini">Mesa ▾</button>
+  <input id="mesaInput" class="mesa-chip" type="text" placeholder="--" readonly>
+
+  <button id="resetBtn" class="btn reset-mini">✕</button>
 </div>
+
 
 <div id="mesaSheet" class="sheet hidden">
   <div class="sheet-content">
@@ -1064,5 +1065,57 @@ document.addEventListener("scroll", () => {
   cursor: pointer;
   flex: 1;                         /* mismo ancho que Borrar */
 }
+</style>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui;
+}
+
+/* tus estilos actuales */
+.btn { ... }
+.input { ... }
+.ticket { ... }
+
+
+/* ===== Control bar compacta ===== */
+.control-bar{
+  display:flex;
+  gap:8px;
+  margin:10px 0 14px;
+  align-items:center;
+}
+
+.control-bar .search{
+  flex:1;
+  font-size:18px;
+  padding:12px;
+}
+
+.mesa-btn-mini{
+  padding:10px 12px !important;
+  font-size:15px !important;
+  border-radius:12px !important;
+}
+
+.mesa-chip{
+  width:56px;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+  border-radius:12px;
+  border:none;
+  background:#F6F5EF;
+  padding:10px;
+}
+
+.reset-mini{
+  background:#c40000 !important;
+  padding:10px 14px !important;
+  font-size:18px !important;
+  border-radius:12px !important;
+}
+
 </style>
 
