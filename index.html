@@ -853,26 +853,6 @@ tabPmenu.addEventListener('click', ()=>{ tabPmenu.classList.add('active'); tabPo
 // Init
 buildPostres(); buildCafes(); buildTe(); buildPmenu(); loadPedido(); menuContainer.style.display='block';
 
-  // ----------------- BÚSQUEDA GLOBAL -----------------
-const searchInput = document.getElementById('searchInput');
-
-searchInput.addEventListener('input', () => {
-  const term = searchInput.value.toLowerCase();
-
-  const tabs = [menuContainer, menuCafes, menuTe, menuPmenu];
-
-  tabs.forEach(tab => {
-    const items = tab.querySelectorAll('.item-btn');
-
-    items.forEach(item => {
-      if (item.textContent.toLowerCase().includes(term)) {
-        item.style.display = 'flex';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  });
-});
 
 // Service worker (if exists)
 if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('service-worker.js'); }catch(e){} }
@@ -924,6 +904,57 @@ function confirmReset() {
   panel.appendChild(w);
 
   abrirModal();
+}
+// ===== BUSCADOR GLOBAL CON CAMBIO AUTOMÁTICO DE PESTAÑA =====
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+
+  const secciones = [
+    {tab: tabPostres, box: menuContainer},
+    {tab: tabCafes, box: menuCafes},
+    {tab: tabTe, box: menuTe},
+    {tab: tabPmenu, box: menuPmenu}
+  ];
+
+  let primeraCoincidencia = null;
+
+  secciones.forEach(sec => {
+    const botones = sec.box.querySelectorAll('.item-btn');
+    let hayMatch = false;
+
+    botones.forEach(btn => {
+      const ok = btn.textContent.toLowerCase().includes(q);
+      btn.style.display = ok ? 'flex' : 'none';
+      if (ok) hayMatch = true;
+    });
+
+    if (hayMatch && !primeraCoincidencia) {
+      primeraCoincidencia = sec;
+    }
+  });
+
+  // si hay búsqueda → cambiar a la pestaña con resultados
+  if (q && primeraCoincidencia) {
+    cambiarTab(primeraCoincidencia.tab);
+  }
+
+  // si está vacío → volver a postres y mostrar todo
+  if (!q) {
+    document.querySelectorAll('.item-btn').forEach(b => b.style.display='flex');
+    cambiarTab(tabPostres);
+  }
+});
+
+function cambiarTab(tab) {
+  [tabPostres, tabCafes, tabTe, tabPmenu].forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+
+  menuContainer.style.display = tab === tabPostres ? 'block' : 'none';
+  menuCafes.style.display    = tab === tabCafes   ? 'block' : 'none';
+  menuTe.style.display       = tab === tabTe      ? 'block' : 'none';
+  menuPmenu.style.display    = tab === tabPmenu   ? 'block' : 'none';
 }
 
   // Conectar el botón Reset con la función
